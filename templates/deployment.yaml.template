@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "$name.name" . }}
+  labels:
+    app: {{ template "$name.name" . }}
+    chart: {{ template "$name.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    repo: {{ index .Values "global" "$name" "repo" }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "$name.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "$name.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      imagePullSecrets:
+        - name: {{ index .Values "global" "$name" "images" "secret" }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ index .Values "global" "$name" "images" "repository" }}/{{ index .Values "global" "$name" "images" "$ccname" "image" }}:{{ index .Values "global" "$name" "images" "$ccname" "tag" }}
+          imagePullPolicy: {{ index .Values "global" "$name" "images" "pullPolicy" }}
+          ports:
+          - containerPort: {{ index .Values "global" "$name" "service" "targetPort" }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ index .Values "global" "$name" "service" "targetPort" }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ index .Values "global" "$name" "service" "targetPort" }}
+          env:
+{{ toYaml (index .Values "global" "$name" "images" "$ccname" "env") | indent 12 }}
+          resources:
+{{ toYaml (index .Values "global" "$name" "images" "$ccname" "resources") | indent 12 }}
+

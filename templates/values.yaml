@@ -1,0 +1,24 @@
+global:
+  $name:
+    repo: $repo
+    images:
+      secret: docker-local-v2-secret
+      repository: mailchannels-docker-local-v2.jfrog.io
+      pullPolicy: IfNotPresent
+      $ccname:
+        image:
+        tag:
+        resources:
+          limits:
+            cpu: $cpu
+            memory: $memory
+        env: {}
+    service:
+      type: $serviceType
+      port: $servicePort
+      targetPort: $containerPort
+  
+
+
+
+
