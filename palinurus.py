@@ -13,7 +13,7 @@ It is work in progress.
 """
 
 class ChartFile(object):
-    """  
+    """
     This class is to be used as base class for future kubernetes resources types ( deployments, statefulsets, services )
     """
     def __init__(self,name, content, destination = None ):
@@ -37,8 +37,8 @@ class Chart(object):
         for fileName in os.listdir(sourceDir):
             fileName = sourceDir+"/"+fileName
             with open(fileName) as fd:
-                textData = fd.read()            
-                yamlObject = yaml.load(textData)
+                textData = fd.read()
+                yamlObject = yaml.safe_load(textData)
                 yamlList.append(yamlObject)
 
         for yobj in yamlList:
@@ -47,7 +47,7 @@ class Chart(object):
                 self.ccname = camelCase(yobj["metadata"]["name"])
                 break
         
-        print "Creating chart %s"%self.name
+        print("Creating chart %s"%self.name)
         try:
             os.stat(self.name)
         except:
@@ -61,7 +61,7 @@ class Chart(object):
         contentDict["name"] = self.name
         contentDict["ccname"] = self.ccname
         chartf = ChartFile("templates/Chart.yaml.template", contentDict, self.name + "/" + "Chart.yaml")
-        
+
 
         contentDict["cpu"]  = "100m"
         contentDict["memory"]  = "256Mi"
@@ -90,7 +90,7 @@ class Chart(object):
         # Create the values file
         valuesf = ChartFile("templates/values.yaml", contentDict, self.name + "/values.yaml")
         # Create the helpers file
-        valuesf = ChartFile("templates/_helpers.tpl", contentDict, self.name + "/templates/_helpers.tpl")        
+        valuesf = ChartFile("templates/_helpers.tpl", contentDict, self.name + "/templates/_helpers.tpl")
         # Create the templates
         for yobj in yamlList:
             contentDict["name"] = self.name
@@ -100,10 +100,9 @@ class Chart(object):
             if yobj["kind"] == "Service":
                 contentDict["name"] = self.name
                 chartf = ChartFile("templates/service.yaml.template", contentDict, self.name + "/templates/" + yobj["metadata"]["name"] + "-service.yaml")
-            
-            
+
 if __name__=="__main__":
-    print "This will convert kubernetes resources to a helm chart"
+    print("This will convert kubernetes resources to a helm chart")
     parser = argparse.ArgumentParser(description='Convert kubernetes resource as helm chart')
     parser.add_argument('--source', help='Kubernetes resource dir',action="store")
     args = parser.parse_args()
@@ -111,10 +110,8 @@ if __name__=="__main__":
     sourceDir = args.source
 
     if not os.path.isdir(sourceDir):
-        print "Directory %s does not exit"%sourceDir
+        print("Directory %s does not exit"%sourceDir)
         sys.exit(1)
     else:
-        print "Using %s"%sourceDir
+        print("Using %s"%sourceDir)
         newchart = Chart(sourceDir)
-            
-
